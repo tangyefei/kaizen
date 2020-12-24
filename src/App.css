@@ -1,0 +1,30 @@
+.app {
+  background-color: #f9f9f9;
+}
+.page {
+  background-color: #fff;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(115, 115, 115, 0.08);
+  width: 874px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 24px;
+}
+input {
+  margin: 0 auto;
+  width: 550px;
+  box-sizing: border-box;
+  border: 1px solid #e8e8e8;
+  padding: 18px 12px;
+  height: 26px;
+  line-height: 26px;
+  outline: none;
+}
+button {
+  margin-left: 24px;
+}
+p.desc {
+  font-size: 0.8em;
+  color: #999;
+  margin: 12px 0 0;
+}

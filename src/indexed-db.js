@@ -47,7 +47,7 @@ export default {
     return request;
   },
 
-  add(objectStoreName, argument) {
+  add(objectStoreName, argument, callback) {
     if (db != null) {
         console.log(db, argument)
 
@@ -57,7 +57,8 @@ export default {
             .add(argument);
 
         request.onsuccess = function(event) {
-            console.log('数据写入成功');
+            console.log('数据写入成功', event);
+            callback(event.target.result);
         };
 
         request.onerror = function(event) {
@@ -119,7 +120,54 @@ export default {
             }
         };
     }
-  }
+  },
+
+  delete(objectStoreName, id, callback) {
+    if (db != null){
+        console.log(db)
+
+        // 执行事务，从对象仓库（表）中获取所有数据
+        var request = db.transaction([objectStoreName], 'readwrite')
+            .objectStore(objectStoreName).delete(id)
+
+        // 数据获取失败
+        request.onerror = function(event) {
+            console.log('事务失败')
+        }
+
+        //数据获取成功
+        request.onsuccess = function(event) {
+            callback();
+            if (request.result) {
+                // 遍历打印所有数据
+                console.log(request.result)
+            } else {
+                console.log('未获得数据记录')
+            }
+        };
+    }
+
+  },
+
+  update: function(objectStoreName, argument, callback) {
+    if (db != null) {
+        console.log(db)
+
+        // 执行事务，添加数据到对象仓库（表）
+        var request = db.transaction([objectStoreName], 'readwrite')
+            .objectStore(objectStoreName)
+            .put(argument);
+
+        request.onsuccess = function(event) {
+            callback()
+            console.log('数据更新成功');
+        };
+
+        request.onerror = function(event) {
+            console.log('数据更新失败');
+        }
+    }
+  },
 
 
 }

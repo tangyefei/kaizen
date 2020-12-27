@@ -116,7 +116,7 @@ class App extends React.Component {
 
     if (this.state.editingNote) {
       const submitItem = Object.assign(this.state.editingNote, {
-        content, 
+        content,
         category
       });
       IndexedDB.update('notes', submitItem, () => {
@@ -131,7 +131,8 @@ class App extends React.Component {
         });
       })
     } else {
-      const item ={ createAt:(new Date()).getTime(), content, category  };
+      const useDefault = category.length === 0 && this.state.activeCate;
+      const item ={ createAt:(new Date()).getTime(), content, category: useDefault ? [ this.state.activeCate ] : category };
       const { categoryList } = this.state;
       IndexedDB.add('notes', item, (id) => {
         this.setState({
@@ -146,7 +147,7 @@ class App extends React.Component {
   editNote(note) {
     this.setState({
       editingNote: note,
-      input: note.content
+      input: `${note.category} ${note.content}`
     });
   }
 

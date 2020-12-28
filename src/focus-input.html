@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- <input type="text" id="test"> -->
+  <script>
+    var reg = /\d+/g
+    var str = 'abc12efg34ddd';
+    let match;
+    let pos = 0;
+    while(match = reg.exec(str)) {
+      let url = match[0];
+      let index = match.index;
+      if(index > pos) {
+        console.log(`<span>${str.substr(pos, index)}</span>`)
+      }
+      console.log(`<a href='${url}'>${url}</a>`)
+      pos = index + url.length;
+    }
+    if(pos<str.length - 1) console.log(`<span>${str.substr(pos, str.length)}</span>`)
+  </script>
+
+</body>
+</html>

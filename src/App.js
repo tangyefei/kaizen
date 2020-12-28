@@ -7,6 +7,18 @@ import Setting from './setting/index';
 
 import './App.css';
 
+function debounce(fn, delay) {
+  var timer
+  return function () {
+    var context = this
+    var args = arguments
+    clearTimeout(timer)
+    timer = setTimeout(function () {
+      fn.apply(context, args)
+    }, delay)
+  }
+}
+
 const CHAR_H_KEYCODE = 72;
 class App extends React.Component {
   constructor(props){
@@ -20,7 +32,9 @@ class App extends React.Component {
       noteVisible: !!(Setting.get('noteVisible')),
       loading: true,
       editingNote: null,
-      gatherMode: false
+      gatherMode: false,
+      textRef: null,
+      inputRef: null,
     }
 
     this.listen();
@@ -54,14 +68,25 @@ class App extends React.Component {
   }
 
   toggleNoteVisible() {
+
     this.setState({ noteVisible: !this.state.noteVisible });
 
     Setting.set('noteVisible', this.state.noteVisible ?  '1' : '');
   }
 
   handleInputChange(e) {
+    let prevStatus = this.state.showTextarea;
     this.setState({
-      input: e.target.value
+      input: e.target.value,
+      showTextarea: e.target.value.length > 50
+    }, () => {
+      const currStatus = this.state.showTextarea;
+      if (prevStatus !== currStatus) {
+        const ref = this[currStatus ? 'textRef' : 'inputRef'];
+        const len = this.state.input.length;
+        ref.focus();
+        ref.setSelectionRange(len, len);
+      }
     })
   }
   handleCateClick(e) {
@@ -129,6 +154,31 @@ class App extends React.Component {
     })
   }
 
+  generateContent(str) {
+    const reg = /(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#[^\s]*)?/g;
+    const res = [];
+    let match;
+    let pos = 0;
+
+    while(match = reg.exec(str)) {
+      let url = match[0];
+      let index = match.index;
+      if(index > pos) {
+        res.push(<span>{str.substr(pos, index)}</span>)
+      }
+      // TODO regexp combine two url together
+      let splits = url.split(' ');
+      splits.forEach(u => {
+        res.push(<a target="_blank" href={u}>{u}</a>)
+        res.push(<span>&nbsp;</span>)
+      })
+      pos = index + url.length;
+    }
+    if(pos<str.length - 1) res.push(<span>{str.substr(pos, str.length)}</span>);
+    debugger
+    return res
+  }
+
   generateOverviewPage() {
     return <div className="page gather-mode">
       {
@@ -141,7 +191,7 @@ class App extends React.Component {
             {
               noteList.map(input => {
                 return <div className="note-item">
-                  <p class="content-row">{ input.content }</p>
+                  <p className="content-row">{ this.generateContent(input.content) }</p>
                 </div>
               })
             }
@@ -152,7 +202,7 @@ class App extends React.Component {
   }
 
   generateWritePage() {
-    const { editingNote, cateActive, noteList } = this.state;
+    const { input, editingNote, cateActive, noteList } = this.state;
     const count = noteList.length;
     const list = cateActive ? noteList.filter(d => d.category[0] === this.state.cateActive) : this.state.noteList;
 
@@ -164,13 +214,13 @@ class App extends React.Component {
               <span>{ cateActive ? '' :  <span>{ d.category && d.category.join('/') }&nbsp;</span> }</span>
               <span className="id-place">#{ d.id }&nbsp;</span>
               <span className="create-date">创建于{manba(Number(d.createAt)).format('k')}</span>
-              <span class="operation">
+              <span className="operation">
                 <a href="#" className="btn" onClick={() => { this.editNote(d)}}>编辑</a>
                 <span style={{ display: 'inline-block', width:'12px' }}></span>
                 <a href="#" className="btn del" onClick={() => { this.delNote(d)}}>删除</a>
               </span>
             </p>
-            <p className="content-row">{d.content}</p>
+            <p className="content-row">{this.generateContent(d.content)}</p>
           </div>
         )
       });
@@ -186,17 +236,22 @@ class App extends React.Component {
         return d ? renderTag(d) : ''
       })];
     }
-
+    // value={this.state.input}
     return <div className="page write-mode">
       <div className="edit-zone">
-        <input className="editor-input" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        {
+        this.state.showTextarea ?
+          <textarea ref={(input) => { this.textRef = input; }} className="editor-textarea" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        : <input ref={(input) => { this.inputRef = input; }} className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        }
+
         {
           this.state.input ?
-          <button onClick={() => { this.handleNoteSave() }}>{ editingNote ? '保存' : '新建' }</button> : ''
+          <button className={this.state.showTextarea ? 'float-right': ''} onClick={() => { this.handleNoteSave() }}>{ editingNote ? '修改' : '完成' }</button> : ''
         }
         {
-          this.state.input ?
-          <button onClick={() => { this.cancelEdit() }}>{ '取消' }</button> : ''
+          this.state.editingNote && this.state.input ?
+          <button className={this.state.showTextarea ? 'float-right': ''} onClick={() => { this.cancelEdit() }}>{ '取消' }</button> : ''
         }
       </div>
 

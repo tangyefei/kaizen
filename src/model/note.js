@@ -11,14 +11,14 @@ export default class Note {
   }
 }
 
-Note.createFromText = function(text) {
-  const splits = text.split(' ');
-  let content = text, category = [];
+Note.createFromText = function(text, category = '未分类') {
+  // const splits = text.split(' ');
+  // let content = text, category = [];
 
-  if(splits.length > 1) {
-    // 定义维数组结构，为了以后支持多级分类进行兼容
-    category = [ splits[0] ];
-    content = splits.slice(1).join(' ');
-  }
-  return new Note(category, content, (new Date()).getTime() );
+  // if(splits.length > 1) {
+  //   // 定义维数组结构，为了以后支持多级分类进行兼容
+  //   category = [ splits[0] ];
+  //   content = splits.slice(1).join(' ');
+  // }
+  return new Note([category], text, (new Date()).getTime() );
 }

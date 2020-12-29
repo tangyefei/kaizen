@@ -112,8 +112,8 @@ export default {
         request.onsuccess = function(event) {
             if (request.result) {
                 // 遍历打印所有数据
-                console.log(request.result)
-                console.log("callback, result:", request.result)
+                // console.log(request.result)
+                // console.log("callback, result:", request.result)
                 callback(request.result);
             } else {
                 console.log('未获得数据记录')

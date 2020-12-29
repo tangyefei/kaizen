@@ -6,3 +6,4 @@ day3. Support text notes save and query with category, use local database or rem
 day4. Support edit and delete function, fix bugs, support daily report generate.
 day5. Refactor code and beautify daily report ui.
 day6. Automatic switch input to textarea when input size is large, support link detect on note.
+day7. Fix input and textarea switch issue, provide options for note category to avoid ambiguity.

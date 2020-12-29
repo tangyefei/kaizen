@@ -35,12 +35,33 @@ class App extends React.Component {
       gatherMode: false,
       textRef: null,
       inputRef: null,
-    }
-
+      showTextarea: false,
+      cateSelected: null,
+    };
+    this.switchInputStyle = debounce(this.switchInputStyle.bind(this), 1200);
     this.listen();
     this.getAllNotes();
   }
 
+  handleCateChange(e) {
+    this.setState({
+      cateSelected: e.target.value
+    })
+  }
+
+  handleComposition(e) {
+    if (e.type === 'compositionend') {
+      // composition is end
+      this.setState({
+        isOnComposition: false
+      });
+    } else {
+      // in composition
+      this.setState({
+        isOnComposition: true
+      });
+    }
+  }
 
   listen() {
     document.addEventListener('keydown', (e) => {
@@ -74,30 +95,44 @@ class App extends React.Component {
     Setting.set('noteVisible', this.state.noteVisible ?  '1' : '');
   }
 
-  handleInputChange(e) {
-    let prevStatus = this.state.showTextarea;
-    this.setState({
-      input: e.target.value,
-      showTextarea: e.target.value.length > 50
-    }, () => {
-      const currStatus = this.state.showTextarea;
-      if (prevStatus !== currStatus) {
-        const ref = this[currStatus ? 'textRef' : 'inputRef'];
-        const len = this.state.input.length;
-        ref.focus();
-        ref.setSelectionRange(len, len);
+  switchInputStyle() {
+    if(this.state.isOnComposition) return;
+
+    const currStatus = this.state.showTextarea;
+    const targetStatus = this.state.input.length > 50;
+      if (targetStatus !== currStatus) {
+        const prevRef = this[targetStatus ? 'inputRef' : 'textRef']
+        const cursorPos = {
+          start: prevRef.selectionStart,
+          end: prevRef.selectionEnd,
+        };
+        this.setState({
+          showTextarea: targetStatus
+        }, () => {
+          const currRef = this[targetStatus ? 'textRef' : 'inputRef']
+          currRef.focus();
+          currRef.setSelectionRange(cursorPos.start, cursorPos.end);
+        })
       }
-    })
+  }
+
+  handleInputChange(e) {
+    this.setState({
+      input: e.target.value
+    }, this.switchInputStyle);
   }
   handleCateClick(e) {
     const category = e.target.dataset.cate;
 
-    this.setState({cateActive: category});
+    this.setState({
+      cateActive: category,
+      cateSelected: category
+    });
   }
 
   handleNoteSave() {
     const input = this.state.input;
-    const { content, category, createAt } = Note.createFromText(input);
+    const { content, category, createAt } = Note.createFromText(input, this.state.cateSelected);
 
     if (this.state.editingNote) {
       const submitItem = Object.assign(this.state.editingNote, {
@@ -113,7 +148,7 @@ class App extends React.Component {
           input: '',
           editingNote: null,
           noteList: listCopy
-        });
+        }, this.switchInputStyle);
       })
     } else {
       const useDefault = category.length === 0 && this.state.cateActive;
@@ -125,7 +160,7 @@ class App extends React.Component {
           input: '',
           noteList: [Object.assign(item, { id }), ...this.state.noteList],
           cateTextList: cateTextList.indexOf(category[0]) > -1 ? cateTextList : [ category[0], ...cateTextList ]
-        })
+        }, this.switchInputStyle)
       });
     }
   }
@@ -133,7 +168,8 @@ class App extends React.Component {
   editNote(note) {
     this.setState({
       editingNote: note,
-      input: `${note.category} ${note.content}`
+      input: note.content,
+      cateSelected: note.category
     });
   }
 
@@ -150,7 +186,7 @@ class App extends React.Component {
   cancelEdit(note) {
     this.setState({
       input: '',
-      editingNote: null
+      editingNote: null,
     })
   }
 
@@ -175,7 +211,6 @@ class App extends React.Component {
       pos = index + url.length;
     }
     if(pos<str.length - 1) res.push(<span>{str.substr(pos, str.length)}</span>);
-    debugger
     return res
   }
 
@@ -239,15 +274,26 @@ class App extends React.Component {
     // value={this.state.input}
     return <div className="page write-mode">
       <div className="edit-zone">
+
+        <select value={this.state.cateSelected} onChange={(e) => { this.handleCateChange(e) }}>
+          {['未分类', ...this.state.cateTextList.filter(d => !!d)].map((option) => (
+            <option value={option}>{option}</option>
+          ))}
+        </select>
         {
         this.state.showTextarea ?
           <textarea ref={(input) => { this.textRef = input; }} className="editor-textarea" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
-        : <input ref={(input) => { this.inputRef = input; }} className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        : <input
+        ref={(input) => { this.inputRef = input; }}
+        onCompositionStart={(e) => this.handleComposition(e)}
+        onCompositionUpdate={(e) => this.handleComposition(e)}
+        onCompositionEnd={(e) => this.handleComposition(e)}
+        className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
         }
 
         {
           this.state.input ?
-          <button className={this.state.showTextarea ? 'float-right': ''} onClick={() => { this.handleNoteSave() }}>{ editingNote ? '修改' : '完成' }</button> : ''
+          <button className={this.state.showTextarea ? 'float-right primary': 'primary'} onClick={() => { this.handleNoteSave() }}>{ editingNote ? '修改' : '完成' }</button> : ''
         }
         {
           this.state.editingNote && this.state.input ?

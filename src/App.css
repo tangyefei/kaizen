@@ -61,24 +61,49 @@ p {
 .write-mode .edit-zone {
   margin-bottom: 24px;
   padding: 24px 24px 0;
+  position: relative;
+}
+.write-mode .edit-zone input {
+  /* TODO how it distrube with button each other */
+  vertical-align: top;
+  min-height: 41px;
 }
 .write-mode .edit-zone input,
 .write-mode .edit-zone textarea {
+  /* text-indent: 60px; */
   border: 1px solid #e8e8e8;
   outline: none;
-  padding: 6px 12px;
-  min-height: 41px;
+  padding: 6px 12px 6px 72px;
   box-sizing: border-box;
   word-break: break-all;
+  line-height: 27px;
+}
+
+.write-mode .edit-zone select,
+.write-mode .edit-zone option {
+  color: #999;
+  width: 60px;
+  height: 39px;
+  box-sizing: border-box;
+  position: absolute;
+  left: 25px;
+  top: 25px;
+  outline: none;
+  border: none;
 }
 .write-mode .edit-zone input {
   width: 85%;
 }
 .write-mode .edit-zone textarea {
   width: 100%;
+  min-height: 68px;
 }
 .write-mode .edit-zone button {
   margin: 12px 0 0 12px;
+}
+.write-mode .edit-zone .primary {
+  /* background: #25b864; */
+  /* color: #fff; */
 }
 .page .note-item {
   padding: 0 24px;

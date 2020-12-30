@@ -3,11 +3,13 @@ export default class Note {
     category: Array
     content: String
     createAt: Number
+    done: Boolean
   */
   constructor(category, content, createAt) {
     this.category = category;
     this.content = content;
     this.createAt = createAt;
+    this.done = false;
   }
 }
 

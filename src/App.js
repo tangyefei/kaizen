@@ -190,8 +190,26 @@ class App extends React.Component {
     })
   }
 
+  toggleDone(note) {
+    const submitItem = Object.assign(note, {
+      done: !note.done
+    });
+
+    NoteDao.update(submitItem, () => {
+      const listCopy = [ ...this.state.noteList ];
+      const index = listCopy.findIndex(d => d.id === note.id);
+      const matched = listCopy[index];
+      matched.done  = submitItem.done;
+
+      this.setState({
+        noteList: listCopy
+      })
+    })
+
+  }
+
   generateContent(str) {
-    const reg = /(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#[^\s]*)?/g;
+    const reg = /(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/[^\s]*)?(\?[^\s]*)?(#[^\s]*)?/g;
     const res = [];
     let match;
     let pos = 0;
@@ -200,17 +218,12 @@ class App extends React.Component {
       let url = match[0];
       let index = match.index;
       if(index > pos) {
-        res.push(<span>{str.substr(pos, index)}</span>)
+        res.push(<span>{str.substring(pos, index)}</span>)
       }
-      // TODO regexp combine two url together
-      let splits = url.split(' ');
-      splits.forEach(u => {
-        res.push(<a target="_blank" href={u}>{u}</a>)
-        res.push(<span>&nbsp;</span>)
-      })
+      res.push(<a target="_blank" href={url}>{url}</a>)
       pos = index + url.length;
     }
-    if(pos<str.length - 1) res.push(<span>{str.substr(pos, str.length)}</span>);
+    if(pos<str.length) res.push(<span>{str.substring(pos, str.length)}</span>);
     return res
   }
 
@@ -250,12 +263,20 @@ class App extends React.Component {
               <span className="id-place">#{ d.id }&nbsp;</span>
               <span className="create-date">创建于{manba(Number(d.createAt)).format('k')}</span>
               <span className="operation">
+                {
+                  cateActive && d.category.join('') === '备忘' ?
+                  <span>
+                    <a href="#" className="btn" onClick={() => { this.toggleDone(d)}}>{d.done ? '未完' : '完成'}</a>
+                    <span style={{ display: 'inline-block', width:'12px' }}></span>
+                  </span> : ''
+                }
+
                 <a href="#" className="btn" onClick={() => { this.editNote(d)}}>编辑</a>
                 <span style={{ display: 'inline-block', width:'12px' }}></span>
                 <a href="#" className="btn del" onClick={() => { this.delNote(d)}}>删除</a>
               </span>
             </p>
-            <p className="content-row">{this.generateContent(d.content)}</p>
+            <p className={d.done ? 'content-row deleted' : 'content-row'}>{this.generateContent(d.content)}</p>
           </div>
         )
       });

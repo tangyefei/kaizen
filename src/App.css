@@ -52,6 +52,9 @@ p {
   color: #000;
   margin: 0;
 }
+.page .note-item .content-row.deleted {
+  text-decoration: line-through;
+}
 
 .write-mode .loading-banner {
   text-align: center;

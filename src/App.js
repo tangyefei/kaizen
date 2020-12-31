@@ -20,6 +20,7 @@ function debounce(fn, delay) {
 }
 
 const CHAR_H_KEYCODE = 72;
+const CHAR_M_KEYCODE = 77;
 class App extends React.Component {
   constructor(props){
     super(props);
@@ -37,6 +38,7 @@ class App extends React.Component {
       inputRef: null,
       showTextarea: false,
       cateSelected: null,
+      dateActive: null,
     };
     this.switchInputStyle = debounce(this.switchInputStyle.bind(this), 1200);
     this.listen();
@@ -65,8 +67,12 @@ class App extends React.Component {
 
   listen() {
     document.addEventListener('keydown', (e) => {
+      console.log(e.keyCode)
       if (e.ctrlKey  && e.keyCode === CHAR_H_KEYCODE) {
         this.toggleNoteVisible()
+      }
+      else if (e.ctrlKey  && e.keyCode === CHAR_M_KEYCODE) {
+        this.switchMode()
       }
     })
   }
@@ -74,10 +80,18 @@ class App extends React.Component {
   getAllNotes() {
     NoteDao.getAll((noteList) => {
       noteList.sort((a,b) => b.createAt - a.createAt );
+
+      const cateTextList = Array.from(new Set( noteList.map(d => d.category[0]) ));
+      const dates = Array.from(new Set(noteList.map(d => manba(Number(d.createAt)).format()))).sort((a,b) => b - a);
+      const dateActive = dates[0];
+      
+      // const noteList = this.state.noteList;
       this.setState({
         loading: false,
         noteList,
-        cateTextList: Array.from(new Set( noteList.map(d => d.category[0]) ))
+        cateTextList,
+        dates,
+        dateActive,
       })
     })
   }
@@ -227,29 +241,100 @@ class App extends React.Component {
     return res
   }
 
+  handleDateClick(e) {
+    const date = e.target.dataset.date;
+    this.setState({
+      dateActive: date
+    })
+
+  }
+
+  prepareDateEls() {
+    const { dates } = this.state
+    const dateEls = dates.map(d => {
+      return <span data-date={d} className={d === this.state.dateActive ? 'tag active' : 'tag' } onClick={(e) => {this.handleDateClick(e) }}>{d}</span>
+    })
+
+    return <div className='date-list'>{dateEls}</div>;
+  }
+
   generateOverviewPage() {
+    const { dateActive } = this.state;
+    const dateEls = this.prepareDateEls();
+    const dailyList = this.state.noteList.filter(d => manba(Number(d.createAt)).format() === dateActive).sort((a,b) => a.createAt - b.createAt );
+    const editZone = this.generateEditZone();
     return <div className="page gather-mode">
+      { editZone }
+      { dateEls }
       {
         this.state.cateTextList.map(cate => {
-          const noteList = this.state.noteList
-            .filter(input => input.category[0] === cate)
-            .sort((a,b) => a.createAt - b.createAt );
-          return <div>
-            <h4>{ cate }</h4>
-            {
-              noteList.map(input => {
-                return <div className="note-item">
-                  <p className="content-row">{ this.generateContent(input.content) }</p>
-                </div>
-              })
-            }
-          </div>
+          const noteList = dailyList.filter(input => input.category[0] === cate);
+          if(noteList.length > 0) {
+            return <div className="cate-not-list">
+              <h4>{ cate }</h4>
+              {
+                noteList.map(d => {
+                  return <div className="note-item">
+                    <p className={d.done ? 'content-row deleted' : 'content-row'}>{this.generateContent(d.content)}</p>
+                  </div>
+                })
+              }
+            </div>
+          } else {
+            return '';
+          }
+          // return {
+          //   noteList.length > 0 ? 
+          //   (<div>
+          //     <h4>{ cate }</h4>
+          //     {
+          //       noteList.map(input => {
+          //         return <div className="note-item">
+          //           <p className="content-row">{ this.generateContent(input.content) }</p>
+          //         </div>
+          //       })
+          //     }
+          //   </div>) : ''
+          // }
         })
       }
     </div>
   }
 
+  generateEditZone() {
+    const { input, editingNote, cateActive, noteList } = this.state;
+    return (
+      <div className="edit-zone">
+        <select value={this.state.cateSelected} onChange={(e) => { this.handleCateChange(e) }}>
+          {['未分类', ...this.state.cateTextList.filter(d => !!d)].map((option) => (
+            <option value={option}>{option}</option>
+          ))}
+        </select>
+        {
+        this.state.showTextarea ?
+          <textarea ref={(input) => { this.textRef = input; }} className="editor-textarea" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        : <input
+        ref={(input) => { this.inputRef = input; }}
+        onCompositionStart={(e) => this.handleComposition(e)}
+        onCompositionUpdate={(e) => this.handleComposition(e)}
+        onCompositionEnd={(e) => this.handleComposition(e)}
+        className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        }
+
+        {
+          this.state.input ?
+          <button className={this.state.showTextarea ? 'float-right primary': 'primary'} onClick={() => { this.handleNoteSave() }}>{ editingNote ? '修改' : '完成' }</button> : ''
+        }
+        {
+          this.state.editingNote && this.state.input ?
+          <button className={this.state.showTextarea ? 'float-right': ''} onClick={() => { this.cancelEdit() }}>{ '取消' }</button> : ''
+        }
+      </div>
+    )
+  }
+
   generateWritePage() {
+    const editZone = this.generateEditZone();
     const { input, editingNote, cateActive, noteList } = this.state;
     const count = noteList.length;
     const list = cateActive ? noteList.filter(d => d.category[0] === this.state.cateActive) : this.state.noteList;
@@ -294,34 +379,7 @@ class App extends React.Component {
     }
     // value={this.state.input}
     return <div className="page write-mode">
-      <div className="edit-zone">
-
-        <select value={this.state.cateSelected} onChange={(e) => { this.handleCateChange(e) }}>
-          {['未分类', ...this.state.cateTextList.filter(d => !!d)].map((option) => (
-            <option value={option}>{option}</option>
-          ))}
-        </select>
-        {
-        this.state.showTextarea ?
-          <textarea ref={(input) => { this.textRef = input; }} className="editor-textarea" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
-        : <input
-        ref={(input) => { this.inputRef = input; }}
-        onCompositionStart={(e) => this.handleComposition(e)}
-        onCompositionUpdate={(e) => this.handleComposition(e)}
-        onCompositionEnd={(e) => this.handleComposition(e)}
-        className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
-        }
-
-        {
-          this.state.input ?
-          <button className={this.state.showTextarea ? 'float-right primary': 'primary'} onClick={() => { this.handleNoteSave() }}>{ editingNote ? '修改' : '完成' }</button> : ''
-        }
-        {
-          this.state.editingNote && this.state.input ?
-          <button className={this.state.showTextarea ? 'float-right': ''} onClick={() => { this.cancelEdit() }}>{ '取消' }</button> : ''
-        }
-      </div>
-
+      { editZone }
       {
         this.state.loading ?
         <div className="loading-banner"><span className="notice">加载中...</span></div> : <div className="page-main">
@@ -336,18 +394,10 @@ class App extends React.Component {
     </div>;
   }
 
-  generateSettingPanel() {
-    return <div className="setting">
-      <input name="mode" type="checkbox" onChange={() => { this.switchMode() }}/>🔨🔨🔨🔨
-    </div>
-  }
-
   render () {
-    const settingPanel = this.generateSettingPanel();
     return (
       <div className="app">
         { this.state.gatherMode ? this.generateOverviewPage() : this.generateWritePage() }
-        { settingPanel }
       </div>
     );
   }

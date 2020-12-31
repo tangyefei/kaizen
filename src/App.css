@@ -2,6 +2,7 @@
 
 h1, h2, h3, h4, h5 {
   padding: 0;
+  margin: 12px 0;
 }
 p {
   margin: 0;
@@ -33,9 +34,6 @@ p {
   text-align: right;
 }
 
-.gather-mode {
-  padding: 24px;
-}
 
 /* common css for both mode */
 
@@ -61,18 +59,18 @@ p {
   padding: 24px 0 0;
 }
 
-.write-mode .edit-zone {
+.page .edit-zone {
   margin-bottom: 24px;
   padding: 24px 24px 0;
   position: relative;
 }
-.write-mode .edit-zone input {
+.page .edit-zone input {
   /* TODO how it distrube with button each other */
   vertical-align: top;
   min-height: 41px;
 }
-.write-mode .edit-zone input,
-.write-mode .edit-zone textarea {
+.page .edit-zone input,
+.page .edit-zone textarea {
   /* text-indent: 60px; */
   border: 1px solid #e8e8e8;
   outline: none;
@@ -82,8 +80,8 @@ p {
   line-height: 27px;
 }
 
-.write-mode .edit-zone select,
-.write-mode .edit-zone option {
+.page .edit-zone select,
+.page .edit-zone option {
   color: #999;
   width: 60px;
   height: 39px;
@@ -94,22 +92,22 @@ p {
   outline: none;
   border: none;
 }
-.write-mode .edit-zone input {
+.page .edit-zone input {
   width: 85%;
 }
-.write-mode .edit-zone textarea {
+.page .edit-zone textarea {
   width: 100%;
   min-height: 68px;
 }
-.write-mode .edit-zone button {
+.page .edit-zone button {
   margin: 12px 0 0 12px;
 }
-.write-mode .edit-zone .primary {
-  /* background: #25b864; */
-  /* color: #fff; */
-}
-.page .note-item {
+
+.write-mode .note-item {
   padding: 0 24px;
+}
+.gather-mode .note-item {
+  padding: 0 12px;
 }
 .write-mode .note-item .btn {
   display: none;
@@ -135,16 +133,26 @@ p {
   padding: 4px 0 8px;
 
 }
-.gather-mode .note-item .content-row {
+.gather-mode .cate-not-list {
+  padding: 0 24px;
+}
+.gather-mode .note-item {
   padding: 4px 0;
 }
+.gather-mode .note-item + .note-item {
+  border-top: 1px dotted #ccc;
+}
 
-.write-mode .category-list {
+
+
+.write-mode .category-list,
+.gather-mode .date-list {
   padding: 12px 0;
   margin: 0 24px;
 }
 
-.write-mode  .category-list .tag {
+/* .write-mode  .category-list  */
+.tag {
   background: #e8e8e8;
   border-radius: 2px;
   padding: 2px 5px;
@@ -152,6 +160,6 @@ p {
   font-size: 0.8em;
   color: #999;
 }
-.write-mode .category-list .active {
+.tag.active {
   color: #000;
 }

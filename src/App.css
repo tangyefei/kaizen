@@ -2,7 +2,7 @@
 
 h1, h2, h3, h4, h5 {
   padding: 0;
-  margin: 12px 0;
+  margin: 0;
 }
 p {
   margin: 0;
@@ -37,12 +37,8 @@ p {
 
 /* common css for both mode */
 
-.page .note-item:hover {
+.write-mode .note-item:hover {
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.08);
-}
-
-.page .notice {
-  font-size: 0.8em;
 }
 
 .page .note-item .content-row {
@@ -52,6 +48,7 @@ p {
 }
 .page .note-item .content-row.deleted {
   text-decoration: line-through;
+  color: #999;
 }
 
 .write-mode .loading-banner {
@@ -60,7 +57,7 @@ p {
 }
 
 .page .edit-zone {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   padding: 24px 24px 0;
   position: relative;
 }
@@ -74,7 +71,7 @@ p {
   /* text-indent: 60px; */
   border: 1px solid #e8e8e8;
   outline: none;
-  padding: 6px 12px 6px 72px;
+  padding: 6px 12px 6px;
   box-sizing: border-box;
   word-break: break-all;
   line-height: 27px;
@@ -106,6 +103,15 @@ p {
 .write-mode .note-item {
   padding: 0 24px;
 }
+.gather-mode {
+  padding-top: 24px;
+}
+.gather-mode .date-section {
+  padding: 12px 12px 12px 24px;
+}
+.gather-mode .nodate-section {
+  padding-left: 12px;
+}
 .gather-mode .note-item {
   padding: 0 12px;
 }
@@ -116,7 +122,8 @@ p {
   display: inline;
   cursor: pointer;
 }
-.write-mode .note-item .desc-row {
+.write-mode .note-item .desc-row,
+.page .notice {
   font-size: 0.8em;
   color: #999;
   padding: 12px 0 6px;
@@ -133,20 +140,22 @@ p {
   padding: 4px 0 8px;
 
 }
-.gather-mode .cate-not-list {
-  padding: 0 24px;
+.gather-mode.all-cates .cate-note-list {
+  padding: 12px 24px 0 12px;
+  border-left: 1px dotted #999;
 }
 .gather-mode .note-item {
-  padding: 4px 0;
+  padding: 4px 12px;
 }
-.gather-mode .note-item + .note-item {
+/* .gather-mode .note-item + .note-item {
   border-top: 1px dotted #ccc;
-}
+} */
 
 
 
 .write-mode .category-list,
-.gather-mode .date-list {
+.gather-mode .date-list,
+.gather-mode .cate-list {
   padding: 12px 0;
   margin: 0 24px;
 }

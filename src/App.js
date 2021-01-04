@@ -4,6 +4,7 @@ import React from 'react';
 import Note from './model/note';
 import NoteDao from './database/note';
 import Setting from './setting/index';
+import Tag from './components/tag';
 
 import './App.css';
 
@@ -41,6 +42,7 @@ class App extends React.Component {
       dateActive: null,
     };
     this.switchInputStyle = debounce(this.switchInputStyle.bind(this), 1200);
+    this.handleCateClick = this.handleCateClick.bind(this);
     this.listen();
     this.getAllNotes();
   }
@@ -84,7 +86,7 @@ class App extends React.Component {
       const cateTextList = Array.from(new Set( noteList.map(d => d.category[0]) ));
       const dates = Array.from(new Set(noteList.map(d => manba(Number(d.createAt)).format()))).sort((a,b) => b - a);
       const dateActive = dates[0];
-      
+
       // const noteList = this.state.noteList;
       this.setState({
         loading: false,
@@ -135,18 +137,16 @@ class App extends React.Component {
       input: e.target.value
     }, this.switchInputStyle);
   }
-  handleCateClick(e) {
-    const category = e.target.dataset.cate;
-
+  handleCateClick(text) {
     this.setState({
-      cateActive: category,
-      cateSelected: category
+      cateActive: text,
+      cateSelected: text
     });
   }
 
   handleNoteSave() {
     const input = this.state.input;
-    const { content, category, createAt } = Note.createFromText(input, this.state.cateSelected);
+    const { content, category, createAt } = Note.createFromText(input);
 
     if (this.state.editingNote) {
       const submitItem = Object.assign(this.state.editingNote, {
@@ -182,7 +182,7 @@ class App extends React.Component {
   editNote(note) {
     this.setState({
       editingNote: note,
-      input: note.content,
+      input: `#${note.category[0]}# ${note.content}`,
       cateSelected: note.category
     });
   }
@@ -249,67 +249,90 @@ class App extends React.Component {
 
   }
 
-  prepareDateEls() {
-    const { dates } = this.state
-    const dateEls = dates.map(d => {
-      return <span data-date={d} className={d === this.state.dateActive ? 'tag active' : 'tag' } onClick={(e) => {this.handleDateClick(e) }}>{d}</span>
-    })
-
-    return <div className='date-list'>{dateEls}</div>;
-  }
-
   generateOverviewPage() {
-    const { dateActive } = this.state;
-    const dateEls = this.prepareDateEls();
-    const dailyList = this.state.noteList.filter(d => manba(Number(d.createAt)).format() === dateActive).sort((a,b) => a.createAt - b.createAt );
-    const editZone = this.generateEditZone();
-    return <div className="page gather-mode">
-      { editZone }
-      { dateEls }
+    const { cateActive, dateActive, cateTextList, noteList, dates } = this.state;
+    const copyList = [ ...noteList ];
+    const dailyList = copyList.sort((a,b) => a.createAt - b.createAt );
+    const renderTag = (text) => {
+      const isActive = (cateActive && cateActive === text) || (!cateActive && !text);
+      return <Tag key={text} text={text} defaultText="全部" isActive={isActive} handleClick={this.handleCateClick} />
+    }
+
+    const renderCateList = () => {
+      let tagList = [renderTag(), ...cateTextList.map(d => {
+        return d ? renderTag(d) : ''
+      })];
+      return <div className='cate-list'>{ tagList }</div>;
+    }
+
+    const generateCateSection = (noteList) => {
+      return noteList.map(d => {
+        return <div className="note-item">
+          <p className={d.done ? 'content-row deleted' : 'content-row'}>{this.generateContent(d.content)}</p>
+        </div>
+      })
+    }
+    // const editZone = this.generateEditZone();
+    //   { editZone }
+      // const noteList = dailyList.filter(input => input.category[0] === this.state.cateActive);
+      {/* { dateEls } */}
+    return <div className={cateActive ? 'page gather-mode' : 'page gather-mode  all-cates'}>
+      { renderCateList() }
       {
-        this.state.cateTextList.map(cate => {
-          const noteList = dailyList.filter(input => input.category[0] === cate);
-          if(noteList.length > 0) {
-            return <div className="cate-not-list">
-              <h4>{ cate }</h4>
-              {
-                noteList.map(d => {
-                  return <div className="note-item">
-                    <p className={d.done ? 'content-row deleted' : 'content-row'}>{this.generateContent(d.content)}</p>
-                  </div>
-                })
+        cateActive ?
+        <div className="nodate-section">
+          <div className="cate-note-list">
+            { generateCateSection(dailyList.filter(input => input.category[0] === cateActive)) }
+          </div>
+        </div>
+         :
+        dates.map(date => {
+          return <div className="date-section">
+            <h5 class="date-title">{manba(date).format('nn')}</h5>
+            {
+              cateTextList.map(cate => {
+              const noteList = dailyList.filter(input => input.category[0] === cate && manba(Number(input.createAt)).format() === date);
+              if(noteList.length > 0) {
+                return <div className="cate-note-list">
+                  <h5>📁 { cate }</h5>
+                  {
+                    generateCateSection(noteList)
+                  }
+                </div>
+              } else {
+                return '';
               }
-            </div>
-          } else {
-            return '';
-          }
-          // return {
-          //   noteList.length > 0 ? 
-          //   (<div>
-          //     <h4>{ cate }</h4>
-          //     {
-          //       noteList.map(input => {
-          //         return <div className="note-item">
-          //           <p className="content-row">{ this.generateContent(input.content) }</p>
-          //         </div>
-          //       })
-          //     }
-          //   </div>) : ''
-          // }
+            })
+            }
+          </div>
         })
       }
     </div>
+
+      // return {
+      //   noteList.length > 0 ?
+      //   (<div>
+      //     <h4>{ cate }</h4>
+      //     {
+      //       noteList.map(input => {
+      //         return <div className="note-item">
+      //           <p className="content-row">{ this.generateContent(input.content) }</p>
+      //         </div>
+      //       })
+      //     }
+      //   </div>) : ''
+      // }
   }
 
   generateEditZone() {
     const { input, editingNote, cateActive, noteList } = this.state;
     return (
       <div className="edit-zone">
-        <select value={this.state.cateSelected} onChange={(e) => { this.handleCateChange(e) }}>
+        {/* <select value={this.state.cateSelected} onChange={(e) => { this.handleCateChange(e) }}>
           {['未分类', ...this.state.cateTextList.filter(d => !!d)].map((option) => (
             <option value={option}>{option}</option>
           ))}
-        </select>
+        </select> */}
         {
         this.state.showTextarea ?
           <textarea ref={(input) => { this.textRef = input; }} className="editor-textarea" value={this.state.input} placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
@@ -318,7 +341,7 @@ class App extends React.Component {
         onCompositionStart={(e) => this.handleComposition(e)}
         onCompositionUpdate={(e) => this.handleComposition(e)}
         onCompositionEnd={(e) => this.handleComposition(e)}
-        className="editor-input" value={this.state.input}  placeholder="请输入内容" onChange={(e) => { this.handleInputChange(e) }} />
+        className="editor-input" value={this.state.input}  placeholder="#主题# 写点什么吧~" onChange={(e) => { this.handleInputChange(e) }} />
         }
 
         {
@@ -347,9 +370,10 @@ class App extends React.Component {
               <span>{ cateActive ? '' :  <span>{ d.category && d.category.join('/') }&nbsp;</span> }</span>
               <span className="id-place">#{ d.id }&nbsp;</span>
               <span className="create-date">创建于{manba(Number(d.createAt)).format('k')}</span>
+              {/* {cateActive + '_' + d.category.join('')} */}
               <span className="operation">
                 {
-                  cateActive && d.category.join('') === '备忘' ?
+                  d.category.join('') === '备忘' ?
                   <span>
                     <a href="#" className="btn" onClick={() => { this.toggleDone(d)}}>{d.done ? '未完' : '完成'}</a>
                     <span style={{ display: 'inline-block', width:'12px' }}></span>
@@ -367,27 +391,17 @@ class App extends React.Component {
       });
     }
 
-    const renderTag = (text) => {
-      const isActive = (cateActive && cateActive === text) || (!cateActive && !text);
-      return <span data-cate={text} className={isActive ? 'tag active' : 'tag' } onClick={(e) => {this.handleCateClick(e) }}>{text || '全部(' + count + ')'}</span>
-    }
-
-    const renderCateList = () => {
-      return [renderTag(), ...this.state.cateTextList.map(d => {
-        return d ? renderTag(d) : ''
-      })];
-    }
     // value={this.state.input}
     return <div className="page write-mode">
       { editZone }
       {
         this.state.loading ?
-        <div className="loading-banner"><span className="notice">加载中...</span></div> : <div className="page-main">
-          <div className="category-list">
+        <div className="loading-banner"><div className="notice">加载中...</div></div> : <div className="page-main">
+          {/* <div className="category-list">
             { this.state.noteVisible ? renderCateList() : <span className="notice">隐藏模式中，ctrl+h切换为“可见模式”</span> }
-          </div>
+          </div> */}
           <div className="note-list">
-            { this.state.noteVisible ? renderCateTags() : ''}
+            { this.state.noteVisible ? renderCateTags() : <div className="note-item"><div className="notice">隐藏模式中，ctrl+h切换为“可见模式”</div></div>}
           </div>
         </div>
       }

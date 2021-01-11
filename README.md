@@ -11,3 +11,5 @@ day8. Support mark the todo ans done or todo, fix http url's regexp check issues
 day9. Support filter with date in gather mode.
 day10. Simplify write mode without category, enhance daily mode with date and category
 day11. Adjust display format and abstract Tag component.
+day12. Support custom createAt input.
+day13. Fix mode switch bugs: category selected not reset.

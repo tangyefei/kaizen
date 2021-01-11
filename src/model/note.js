@@ -1,5 +1,3 @@
-import manba from 'manba';
-
 export default class Note {
   /*
     category: Array
@@ -16,12 +14,17 @@ export default class Note {
 }
 
 Note.createFromText = function(input) {
-  let category = 'n/a';
+  let match = input.match(/^\#(.+)\#\s{1,}(\d{4}-\d{2}-\d{2}){0,1}(.+)$/)
   let text = input;
-  let match = input.match(/^\#(.+)\#\s{1,}(.+)$/)
+  let createAt = null;
+  let category = 'n/a';
+
   if(match) {
     category = match[1];
-    text = match[2];
+    text = match[3]
+    createAt = match[2] ? match[2] : null;
   }
-  return new Note([category], text, (new Date()).getTime());
+  let time = createAt ? (new Date(createAt)).getTime() : (new Date()).getTime();
+
+  return new Note([category], text, time);
 }

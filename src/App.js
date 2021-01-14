@@ -15,6 +15,7 @@ const CHAR_M_KEYCODE = 77;
 const WRITE_MODE = Symbol('WRITE_MODE');
 const GATHER_MODE = Symbol('GATHER_MODE');
 class App extends React.Component {
+// const App = React.createClass({
   constructor(props){
     super(props);
 
@@ -183,7 +184,7 @@ class App extends React.Component {
   generateOverviewPage() {
     const { cateActive, cateTextList, noteList, dates } = this.state;
     const copyList = [ ...noteList ];
-    const dailyList = copyList.sort((a,b) => a.createAt - b.createAt );
+    const dailyList = copyList.sort((a,b) => cateActive ? b.createAt - a.createAt : a.createAt - b.createAt );
     const renderTag = (text) => {
       const isActive = (cateActive && cateActive === text) || (!cateActive && !text);
       return <Tag key={text} text={text} defaultText="全部" isActive={isActive} handleClick={this.handleCateClick} />
@@ -199,7 +200,11 @@ class App extends React.Component {
     const generateCateSection = (noteList, showDate) => {
       return noteList.map(d => {
         return <div className="note-item">
-          <p className={d.done ? 'content-row deleted' : 'content-row'}>{showDate ? manba(d.createAt).format('MM-DD') : ''} {this.generateContent(d.content)}</p>
+          <p className={d.done ? 'content-row deleted' : 'content-row'}>
+            {/* {showDate ? manba(d.createAt).format('MM-DD') : ''}  */}
+            {this.generateContent(d.content)}
+            <a href="#" className="btn del float-right" onClick={() => { this.delNote(d)}}>删除</a>
+          </p>
         </div>
       })
     }

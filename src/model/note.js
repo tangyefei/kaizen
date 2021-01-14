@@ -14,7 +14,7 @@ export default class Note {
 }
 
 Note.createFromText = function(input) {
-  let match = input.match(/^\#(.+)\#\s{1,}(\d{4}-\d{2}-\d{2}){0,1}(.+)$/)
+  let match = input.match(/^\#(.+)\#\s{1,}(\d{4}-\d{2}-\d{2})?\s?([\w\W]+)$/);
   let text = input;
   let createAt = null;
   let category = 'n/a';

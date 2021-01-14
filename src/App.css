@@ -46,11 +46,20 @@ p {
   color: #000;
   margin: 0;
 }
+.page .note-item .content-row .btn {
+  display: none;
+}
+.page .note-item .content-row:hover .btn {
+  display: inline;
+}
 .page .note-item .content-row.deleted {
   text-decoration: line-through;
   color: #999;
 }
-
+.page .note-item .content-row span {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
 .write-mode .loading-banner {
   text-align: center;
   padding: 24px 0 0;
@@ -112,9 +121,6 @@ p {
 .gather-mode .nodate-section {
   padding-left: 12px;
 }
-.gather-mode .note-item {
-  padding: 0 12px;
-}
 .write-mode .note-item .btn {
   display: none;
 }
@@ -145,7 +151,7 @@ p {
   border-left: 1px dotted #999;
 }
 .gather-mode .note-item {
-  padding: 4px 12px;
+  padding: 12px;
 }
 /* .gather-mode .note-item + .note-item {
   border-top: 1px dotted #ccc;

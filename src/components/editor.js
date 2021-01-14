@@ -28,7 +28,7 @@ class Editor extends React.Component {
   }
 
   updateInput(input){
-    this.setState({ input });
+    this.setState({ input }, this.switchInputStyle);
   }
 
   handleComposition(e) {

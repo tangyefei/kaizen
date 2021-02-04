@@ -1,0 +1,23 @@
+.app-sider {
+  width: 219px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgb(247, 246, 243);
+}
+
+.app-sider .title {
+  height: 45px;
+  line-height: 45px;
+  padding: 0 14px;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  font-size: 14px;
+  min-height: 27px;
+  padding: 2px 14px;
+}

@@ -1,0 +1,28 @@
+.editor {
+}
+.editor textarea {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  outline: none;
+  margin-bottom: 12px;
+  border: 1px solid #e4e4e4;
+  outline: none;
+}
+.editor .btn {
+  background-color: #25b864;
+  border-radius: 4px;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.editor .btn:hover {
+  background-color: #47c479;
+}
+.editor span {
+  color: #999;
+  font-size: 13px;
+  margin-left: 12px;
+}

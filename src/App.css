@@ -168,13 +168,17 @@ p {
 
 /* .write-mode  .category-list  */
 .tag {
-  background: #e8e8e8;
+  /* background: #e8e8e8; */
+  /* background: rgba(170, 219,45,  0.3); */
+  /* background: #44d87f; */
+  background: #999;
   border-radius: 2px;
-  padding: 2px 5px;
+  color: #fff;
+  padding: 0.1em 0.2em;
   margin-right: 5px;
-  margin-bottom: 5px;
-  font-size: 0.8em;
-  color: #999;
+  /* margin-bottom: 5px; */
+  font-size: 0.9em;
+  color: #fff;
   display: inline-block;
 }
 .tag.active {

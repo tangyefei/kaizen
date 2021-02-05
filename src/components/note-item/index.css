@@ -1,0 +1,34 @@
+.note-item .btn {
+  display: none;
+}
+.note-item:hover .btn {
+  display: inline;
+  cursor: pointer;
+}
+.note-item .desc-row {
+  font-size: 0.8em;
+  color: #999;
+  padding: 12px 0 6px;
+  min-height: 21px;
+  box-sizing: content-box;
+}
+
+.note-item .content-row {
+  font-size: 14px;
+  color: #000;
+  margin: 0;
+  background: #f8f8f8;
+  padding: 12px 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+
+.note-item .desc-row .operation {
+  /* float: left; */
+  padding-left: 24px;
+}
+.note-item .desc-row .operation .del {
+  /* color: red; */
+  text-decoration: none;;
+}

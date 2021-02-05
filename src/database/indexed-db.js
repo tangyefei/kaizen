@@ -122,7 +122,7 @@ export default {
     }
   },
 
-  delete(objectStoreName, id, callback) {
+  delete(objectStoreName, id, callback = ()=>{}) {
     if (db != null){
         console.log(db)
 

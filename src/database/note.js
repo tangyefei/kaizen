@@ -1,5 +1,6 @@
 import IndexedDB from './indexed-db.js';
 
+
 export default {
   getAll: function(callback) {
     IndexedDB.openDB('kaizen', 'notes', 1);

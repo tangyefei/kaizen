@@ -8,15 +8,15 @@ class AppSider extends React.Component {
 
   render () {
     return (
-      <sider className="app-sider">
-        <div class="title">
+      <nav className="app-sider">
+        <div className="title">
           Yefei's kaizen
         </div>
         <ul>
           <li>小记</li>
           <li>我的空间</li>
         </ul>
-      </sider>
+      </nav>
     );
   }
 }
